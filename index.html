@@ -137,19 +137,44 @@
 </head>
 <!-- 以下是今天新增的“大脑”部分 -->
 <script>
-    // 这是一个“自定义打招呼”的函数（就像给大脑设置了一个“打招呼”按钮的响应程序）
-    function customGreeting() {
-        // 1. 弹出一个输入框，让用户打字，并把打好的字放进“userName”这个小盒子里
-        let userName = prompt('请输入你的名字：');
+    // 【1. 页面一打开，自动执行“回忆”程序】
+    // 这相当于网站一睁眼，就去翻自己的“小笔记本”，看看之前记了啥。
+    window.onload = function() {
+        // 去笔记本里找找有没有叫 'userName' 的记录
+        let savedName = localStorage.getItem('userName');
         
-        // 2. 如果用户真的打了字（没有点取消，也没有留空）
-        if (userName) {
-            // 3. 找到那个叫 greeting 的标题，把里面的内容改成“你好，XXX！欢迎光临！”
+        // 如果找到了（说明是老顾客）
+        if (savedName) {
+            // 直接把标题改成“你好，XXX！欢迎光临！”
+            document.getElementById('greeting').innerHTML = '你好，' + savedName + '！欢迎光临！';
+        }
+    }
+
+    // 【2. 这是“自定义打招呼”函数（升级版）】
+    function customGreeting() {
+        // 弹出输入框，让用户输入
+        let userName = prompt('请输入你的名字：');
+
+        // 判断：如果用户真的打了字（而且不是空格）
+        if (userName && userName.trim() !== '') {
+            // 【核心升级】把这个名字写进浏览器的“小笔记本”（永久保存）
+            localStorage.setItem('userName', userName);
+            
+            // 同时把网页上的标题改掉
             document.getElementById('greeting').innerHTML = '你好，' + userName + '！欢迎光临！';
         } else {
-            // 如果用户点了取消或者没打字，就提醒一下
+            // 如果用户点了取消或者没打字
             alert('名字不能为空哦，再试一次吧！');
         }
+    }
+
+    // 【3. 新增功能：清除记忆（给用户反悔的权利）】
+    function forgetMe() {
+        // 从笔记本里把名字记录撕掉
+        localStorage.removeItem('userName');
+        // 把网页上的标题恢复成出厂设置
+        document.getElementById('greeting').innerHTML = '你好，我是 123-0215';
+        alert('已清除记忆！下次刷新页面，网站就不认识你了。');
     }
 </script>
 <body>
@@ -173,6 +198,8 @@
             <a href="#" class="btn btn-github">🐙 GitHub</a>
             <a href="#" class="btn btn-blog" onclick="document.getElementById('greeting').innerHTML = '你好，编程大牛！🚀'">📝 点我改名</a>
             <a href="#" class="btn btn-email" onclick="alert('嘿嘿，你好呀！很高兴认识你！')">✉️ 联系我</a>
+            <!-- 这是新增的“清除记忆”按钮（红色） -->
+            <a href="#" class="btn" style="background:#e17055; color:white;" onclick="forgetMe()">🧹 清除记忆</a>
         </div>
 <!-- 这是新增的“自定义称呼”按钮 -->
 <a href="#" class="btn" style="background:#00b894; color:white;" onclick="customGreeting()">✏️ 自定义称呼</a>

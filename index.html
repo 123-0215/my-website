@@ -1,2 +1,53 @@
-<h1>你好，GitHub！这是我的第一个网页</h1>
-<p>今天天气真好，我学会了存档！</p>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的第一个装修网站</title>
+    <style>
+        /* 这就是“墙漆”和“家具”的配置 */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 刷上一面从蓝色到紫色的渐变墙漆 */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: '微软雅黑', sans-serif;
+        }
+        .card {
+            background: white; /* 白色的卡片，像一张放在地上的地毯 */
+            padding: 50px 60px;
+            border-radius: 20px; /* 把卡片的四个角磨圆 */
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); /* 给卡片加个投影，显得立体 */
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .emoji-big {
+            font-size: 60px;
+            display: block;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <span class="emoji-big">🚀</span>
+        <h1>你好，未来大牛！</h1>
+        <p>这是我亲手装修的第一个网页。</p>
+        <p>我已经学会了 <strong>Commit</strong> 和 <strong>Push</strong>，<br>感觉棒极了！🎉</p>
+        <p style="font-size:14px; color:#aaa; margin-top:20px;">—— 来自新手的炫耀</p>
+    </div>
+</body>
+</html>

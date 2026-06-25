@@ -138,102 +138,140 @@
 <!-- 以下是今天新增的“大脑”部分 -->
 
 <script>
-    // 【1. 页面一打开，自动执行“回忆”程序】
-    // 这相当于网站一睁眼，就去翻自己的“小笔记本”，看看之前记了啥。
+    // ============================================
+    // 第一部分：永久记忆功能（你之前写的，原封不动）
+    // ============================================
     window.onload = function() {
-        // 去笔记本里找找有没有叫 'userName' 的记录
         let savedName = localStorage.getItem('userName');
-        
-        // 如果找到了（说明是老顾客）
         if (savedName) {
-            // 直接把标题改成“你好，XXX！欢迎光临！”
             document.getElementById('greeting').innerHTML = '你好，' + savedName + '！欢迎光临！';
         }
     }
 
-    // 【2. 这是“自定义打招呼”函数（升级版）】
     function customGreeting() {
-        // 弹出输入框，让用户输入
         let userName = prompt('请输入你的名字：');
-
-        // 判断：如果用户真的打了字（而且不是空格）
         if (userName && userName.trim() !== '') {
-            // 【核心升级】把这个名字写进浏览器的“小笔记本”（永久保存）
             localStorage.setItem('userName', userName);
-            
-            // 同时把网页上的标题改掉
             document.getElementById('greeting').innerHTML = '你好，' + userName + '！欢迎光临！';
         } else {
-            // 如果用户点了取消或者没打字
             alert('名字不能为空哦，再试一次吧！');
         }
     }
 
-    // 【3. 新增功能：清除记忆（给用户反悔的权利）】
     function forgetMe() {
-        // 从笔记本里把名字记录撕掉
         localStorage.removeItem('userName');
-        // 把网页上的标题恢复成出厂设置
         document.getElementById('greeting').innerHTML = '你好，我是 123-0215';
         alert('已清除记忆！下次刷新页面，网站就不认识你了。');
     }
-   
-    async function fetchMyRepos() {
-        // 1. 获取用来展示项目的容器
+
+    // ============================================
+    // 第二部分：数据仓库（专门用来存放获取到的项目列表）
+    // ============================================
+    // 这是一个“全局变量”，就像一个大箱子，专门用来存放从 GitHub 搬来的书。
+    // 这样不管怎么排序，原始数据都在，随时可以重新排列。
+    let allRepos = [];
+
+    // ============================================
+    // 第三部分：装修队（专门负责把数据变成卡片）
+    // ============================================
+    // 这个函数只做一件事：给我一堆数据（repos），我就把它们画成卡片。
+    // 以后只要调用它，传入不同的数据，卡片就会自动刷新。
+    function renderRepos(repos) {
         const container = document.getElementById('repo-container');
         
-        // 2. 告诉用户“我正在打电话联系 GitHub...”
+        // 如果传进来的数据是空的，或者没有项目
+        if (!repos || repos.length === 0) {
+            container.innerHTML = '<p style="color: #999; text-align: center;">😅 这个用户还没有公开项目。</p>';
+            return;
+        }
+
+        // 开始“装修”（生成卡片 HTML）
+        let repoHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+        
+        repos.forEach(repo => {
+            repoHtml += `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 4px solid #6c5ce7;">
+                    <a href="${repo.html_url}" target="_blank" style="font-weight: bold; color: #2d3436; text-decoration: none; font-size: 16px;">
+                        📁 ${repo.name}
+                    </a>
+                    <p style="font-size: 14px; color: #636e72; margin: 8px 0 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${repo.description || '这个项目还没有描述'}
+                    </p>
+                    <div style="margin-top: 10px; font-size: 12px; color: #b2bec3;">
+                        ⭐ ${repo.stargazers_count} · 🍴 ${repo.forks_count}
+                    </div>
+                    <div style="font-size: 12px; color: #6c5ce7; margin-top: 4px;">💻 ${repo.language || '未知'}</div>
+                </div>
+            `;
+        });
+
+        repoHtml += '</div>';
+        container.innerHTML = repoHtml;
+    }
+
+    // ============================================
+    // 第四部分：打电话给 GitHub（获取数据）
+    // ============================================
+    async function fetchMyRepos() {
+        const container = document.getElementById('repo-container');
         container.innerHTML = '<p style="color: #666; text-align: center;">⏳ 正在连接 GitHub，获取项目清单...</p>';
 
-        // 3. 关键步骤：用 GitHub 的“电话号码”拨打电话！
-        //    把下面的 "123-0215" 换成你自己的 GitHub 用户名
+        // 【注意】把 "123-0215" 换成你自己的 GitHub 用户名！
         const apiUrl = 'https://api.github.com/users/123-0215/repos?sort=updated&per_page=6';
         
         try {
-            // 4. 拨打电话 (fetch)，并等待 (await) 对方接听
             const response = await fetch(apiUrl);
-
-            // 5. 检查电话是否接通 (如果没接通，比如用户不存在，就报错)
             if (!response.ok) {
                 throw new Error(`GitHub 说: 找不到这个用户 (错误码: ${response.status})`);
             }
-
-            // 6. 对方开始说话，把 JSON 语言“翻译”成我们能懂的数据 (JavaScript 对象)
             const repos = await response.json();
 
-            // 7. 如果 GitHub 说这个用户没有任何项目
-            if (repos.length === 0) {
-                container.innerHTML = '<p style="color: #999; text-align: center;">😅 这个用户还没有公开项目。</p>';
-                return;
-            }
-
-            // 8. 开始“装修”展位：把每个项目都变成一张小卡片
-            let repoHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+            // 【关键步骤】把拿到的数据存进全局变量 allRepos 里
+            allRepos = repos;
             
-            repos.forEach(repo => {
-                repoHtml += `
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 4px solid #6c5ce7;">
-                        <a href="${repo.html_url}" target="_blank" style="font-weight: bold; color: #2d3436; text-decoration: none; font-size: 16px;">
-                            📁 ${repo.name}
-                        </a>
-                        <p style="font-size: 14px; color: #636e72; margin: 8px 0 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            ${repo.description || '这个项目还没有描述'}
-                        </p>
-                        <div style="margin-top: 10px; font-size: 12px; color: #b2bec3;">
-                            ⭐ ${repo.stargazers_count} · 🍴 ${repo.forks_count}
-                        </div>
-                    </div>
-                `;
-            });
-
-            repoHtml += '</div>';
-            container.innerHTML = repoHtml;
+            // 调用“装修队”，把数据画成卡片
+            renderRepos(allRepos);
 
         } catch (error) {
-            // 9. 如果电话没打通（网络错误等），告诉用户出问题了
             console.error('获取仓库失败:', error);
             container.innerHTML = `<p style="color: #e17055; text-align: center;">❌ 哎呀，加载失败了: ${error.message}。请稍后再试！</p>`;
         }
+    }
+
+    // ============================================
+    // 第五部分：排序功能（图书管理员的技能）
+    // ============================================
+    
+    // 按星星数排序（从多到少）
+    function sortByStars() {
+        // 1. 复制一份原始数据（防止直接修改原数组，养成好习惯）
+        const sorted = [...allRepos];
+        
+        // 2. 排序：比较两个项目的星星数，如果 a 的星星比 b 少，就把 a 往后挪
+        sorted.sort((a, b) => b.stargazers_count - a.stargazers_count);
+        
+        // 3. 调用“装修队”重新绘制卡片
+        renderRepos(sorted);
+    }
+
+    // 按项目名排序（字母顺序 A → Z）
+    function sortByName() {
+        // 1. 复制一份原始数据
+        const sorted = [...allRepos];
+        
+        // 2. 排序：比较两个项目的名字（字符串比较）
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // 3. 调用“装修队”重新绘制卡片
+        renderRepos(sorted);
+    }
+
+    // 按更新时间排序（最新的在前）—— 这是默认的排序方式
+    function sortByRecent() {
+        const sorted = [...allRepos];
+        // 这里假设 GitHub 返回的 order 已经是最近更新的，但我们手动按 updated_at 排一下
+        sorted.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+        renderRepos(sorted);
     }
 </script>
 <body>
@@ -257,7 +295,12 @@
 
         <h1 id="greeting">你好，我是 123-0215</h1>
         <p class="title">🚀 前端开发练习生</p>
-
+<!-- 排序控制台（图书管理员的工具） -->
+<div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 10px;">
+    <a href="#" class="btn" style="background:#fd79a8; color:white; padding:8px 20px;" onclick="sortByStars()">⭐ 按热度排序</a>
+    <a href="#" class="btn" style="background:#00b894; color:white; padding:8px 20px;" onclick="sortByName()">📛 按名称排序</a>
+    <a href="#" class="btn" style="background:#fdcb6e; color:#2d3436; padding:8px 20px;" onclick="sortByRecent()">🕒 按最近更新</a>
+</div>
         <p class="bio">
             我刚刚学会了 <strong>Git</strong> 和 <strong>GitHub Pages</strong>，<br>
             这是我亲手搭建并上线的小名片。每天进步一点点！

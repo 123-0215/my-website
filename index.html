@@ -136,6 +136,7 @@
     </style>
 </head>
 <!-- 以下是今天新增的“大脑”部分 -->
+
 <script>
     // 【1. 页面一打开，自动执行“回忆”程序】
     // 这相当于网站一睁眼，就去翻自己的“小笔记本”，看看之前记了啥。
@@ -176,9 +177,78 @@
         document.getElementById('greeting').innerHTML = '你好，我是 123-0215';
         alert('已清除记忆！下次刷新页面，网站就不认识你了。');
     }
+   
+    async function fetchMyRepos() {
+        // 1. 获取用来展示项目的容器
+        const container = document.getElementById('repo-container');
+        
+        // 2. 告诉用户“我正在打电话联系 GitHub...”
+        container.innerHTML = '<p style="color: #666; text-align: center;">⏳ 正在连接 GitHub，获取项目清单...</p>';
+
+        // 3. 关键步骤：用 GitHub 的“电话号码”拨打电话！
+        //    把下面的 "123-0215" 换成你自己的 GitHub 用户名
+        const apiUrl = 'https://api.github.com/users/123-0215/repos?sort=updated&per_page=6';
+        
+        try {
+            // 4. 拨打电话 (fetch)，并等待 (await) 对方接听
+            const response = await fetch(apiUrl);
+
+            // 5. 检查电话是否接通 (如果没接通，比如用户不存在，就报错)
+            if (!response.ok) {
+                throw new Error(`GitHub 说: 找不到这个用户 (错误码: ${response.status})`);
+            }
+
+            // 6. 对方开始说话，把 JSON 语言“翻译”成我们能懂的数据 (JavaScript 对象)
+            const repos = await response.json();
+
+            // 7. 如果 GitHub 说这个用户没有任何项目
+            if (repos.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center;">😅 这个用户还没有公开项目。</p>';
+                return;
+            }
+
+            // 8. 开始“装修”展位：把每个项目都变成一张小卡片
+            let repoHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+            
+            repos.forEach(repo => {
+                repoHtml += `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 4px solid #6c5ce7;">
+                        <a href="${repo.html_url}" target="_blank" style="font-weight: bold; color: #2d3436; text-decoration: none; font-size: 16px;">
+                            📁 ${repo.name}
+                        </a>
+                        <p style="font-size: 14px; color: #636e72; margin: 8px 0 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${repo.description || '这个项目还没有描述'}
+                        </p>
+                        <div style="margin-top: 10px; font-size: 12px; color: #b2bec3;">
+                            ⭐ ${repo.stargazers_count} · 🍴 ${repo.forks_count}
+                        </div>
+                    </div>
+                `;
+            });
+
+            repoHtml += '</div>';
+            container.innerHTML = repoHtml;
+
+        } catch (error) {
+            // 9. 如果电话没打通（网络错误等），告诉用户出问题了
+            console.error('获取仓库失败:', error);
+            container.innerHTML = `<p style="color: #e17055; text-align: center;">❌ 哎呀，加载失败了: ${error.message}。请稍后再试！</p>`;
+        }
+    }
 </script>
 <body>
+<!-- 新玩具：GitHub 项目展示器 -->
+<hr style="margin: 30px 0; border: 1px solid #eee;">  <!-- 这是一条分割线，把名片和新功能分开 -->
 
+<h3 style="color:#2d3436;">📦 我的 GitHub 项目</h3>
+
+<!-- 一个用来展示项目的容器，刚开始是空的 -->
+<div id="repo-container" style="text-align: left; margin-top: 15px;">
+    <p style="color: #999; text-align: center;">点击下方按钮，加载我的项目</p>
+</div>
+
+<!-- 触发“打电话”动作的按钮 -->
+<a href="#" class="btn" style="background:#6c5ce7; color:white; margin-top: 10px;" onclick="fetchMyRepos()">🚀 显示我的项目</a>
     <!-- 主卡片 -->
     <div class="card">
 

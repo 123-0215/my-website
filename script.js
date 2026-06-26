@@ -400,95 +400,42 @@ function loadLastWeather() {
 // ============================================
 // 8. 每日金句功能（使用 adviceslip.com）
 // ============================================
+// ============================================
+// 8. 每日金句功能（完全本地，无需网络）
+// ============================================
 let currentQuote = {
     text: '',
     author: ''
 };
 
-async function fetchQuote() {
+// 本地名言库（你可以随意增删）
+const quoteLibrary = [
+    { text: '生活就像一盒巧克力，你永远不知道下一颗是什么味道', author: '《阿甘正传》' },
+    { text: '不要问你的国家能为你做什么，而要问你能为你的国家做什么', author: '肯尼迪' },
+    { text: '成功不是终点，失败也不是终结，唯有勇气才是永恒', author: '丘吉尔' },
+    { text: '世界上只有一种真正的英雄主义，那就是认清生活的真相后依然热爱生活', author: '罗曼·罗兰' },
+    { text: '路漫漫其修远兮，吾将上下而求索', author: '屈原' },
+    { text: '学而不思则罔，思而不学则殆', author: '孔子' },
+    { text: 'Stay hungry, stay foolish.', author: 'Steve Jobs' },
+    { text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs' },
+    { text: '人生就像骑自行车，要保持平衡就得往前走', author: '爱因斯坦' },
+    { text: '不要为成功而努力，要为做一个有价值的人而努力', author: '爱因斯坦' },
+];
+
+function fetchQuote() {
     const textEl = document.getElementById('quote-text');
     const authorEl = document.getElementById('quote-author');
 
-    textEl.textContent = '⏳ 加载中...';
-    authorEl.textContent = '——';
+    // 从本地库中随机选一条
+    const randomIndex = Math.floor(Math.random() * quoteLibrary.length);
+    const quote = quoteLibrary[randomIndex];
 
-    const fallbackQuotes = [
-        { text: '生活就像一盒巧克力，你永远不知道下一颗是什么味道', author: '《阿甘正传》' },
-        { text: '不要问你的国家能为你做什么，而要问你能为你的国家做什么', author: '肯尼迪' },
-        { text: '成功不是终点，失败也不是终结，唯有勇气才是永恒', author: '丘吉尔' },
-        { text: '世界上只有一种真正的英雄主义，那就是认清生活的真相后依然热爱生活', author: '罗曼·罗兰' },
-        { text: '路漫漫其修远兮，吾将上下而求索', author: '屈原' },
-        { text: '学而不思则罔，思而不学则殆', author: '孔子' },
-        { text: 'Stay hungry, stay foolish.', author: 'Steve Jobs' },
-        { text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs' },
-    ];
+    textEl.textContent = '💬 ' + quote.text;
+    authorEl.textContent = '—— ' + quote.author;
 
-    try {
-        // 使用 adviceslip.com API（无需 SSL 证书问题）
-        const response = await fetch('https://api.adviceslip.com/advice');
-
-        if (!response.ok) {
-            throw new Error(`请求失败 (状态码: ${response.status})`);
-        }
-
-        const data = await response.json();
-        
-        // adviceslip.com 返回的是 { slip: { id, advice } }
-        const content = data.slip.advice || '获取建议失败';
-        const author = '💡 每日建议';
-
-        textEl.textContent = '💡 ' + content;
-        authorEl.textContent = '—— ' + author;
-
-        currentQuote = {
-            text: content,
-            author: author
-        };
-
-    } catch (error) {
-        console.warn('API 请求失败，使用本地备用名言:', error);
-        const random = fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
-        textEl.textContent = '💬 ' + random.text;
-        authorEl.textContent = '—— ' + random.author;
-        currentQuote = { text: random.text, author: random.author };
-    }
-}
-
-function copyQuote() {
-    if (!currentQuote.text) {
-        alert('⚠️ 还没有名言可以复制，先点击“换一句”吧！');
-        return;
-    }
-
-    const copyText = `「${currentQuote.text}」—— ${currentQuote.author}`;
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(copyText)
-            .then(() => {
-                alert('✅ 名言已复制到剪贴板！');
-            })
-            .catch(() => {
-                fallbackCopy(copyText);
-            });
-    } else {
-        fallbackCopy(copyText);
-    }
-}
-
-function fallbackCopy(text) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-
-    try {
-        document.execCommand('copy');
-        alert('✅ 名言已复制到剪贴板！');
-    } catch (err) {
-        alert('❌ 复制失败，请手动复制。');
-    }
-
-    document.body.removeChild(textarea);
+    // 保存当前名言供复制使用
+    currentQuote = {
+        text: quote.text,
+        author: quote.author
+    };
 }

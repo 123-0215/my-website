@@ -58,7 +58,7 @@ async function fetchQuote() {
 
     try {
         // 调用 quotable.io 随机名言 API
-        const response = await fetch('https://api.quotable.io/random');
+        const response = await fetch('https://api.adviceslip.com/advice');
 
         if (!response.ok) {
             throw new Error(`请求失败 (状态码: ${response.status})`);
@@ -588,4 +588,111 @@ function loadLastWeather() {
         // 自动查询天气（可选，如果不想自动加载可以注释掉）
         // fetchWeather();
     }
+    // ============================================
+// 7. 每日金句功能
+// ============================================
+
+// 当前显示的名言（用于复制功能）
+let currentQuote = {
+    text: '',
+    author: ''
+};
+
+/**
+ * 从 API 获取一条随机名言
+ * 使用 quotable.io 免费 API，无需 API Key
+ */
+async function fetchQuote() {
+    const textEl = document.getElementById('quote-text');
+    const authorEl = document.getElementById('quote-author');
+
+    // 显示加载状态
+    textEl.textContent = '⏳ 加载中...';
+    authorEl.textContent = '——';
+
+    try {
+        // 调用 quotable.io 随机名言 API
+        const response = await fetch('https://api.quotable.io/random');
+
+        if (!response.ok) {
+            throw new Error(`请求失败 (状态码: ${response.status})`);
+        }
+
+        const data = await response.json();
+
+        // 提取数据
+        const content = data.content || '名言加载失败';
+        const author = data.author || '未知作者';
+
+        // 更新界面
+        textEl.textContent = '💬 ' + content;
+        authorEl.textContent = '—— ' + author;
+
+        // 保存当前名言（用于复制）
+        currentQuote = {
+            text: content,
+            author: author
+        };
+
+    } catch (error) {
+        console.error('获取名言失败:', error);
+        // 如果 API 失败，使用本地备用名言
+        const fallbackQuotes = [
+            { text: '生活就像一盒巧克力，你永远不知道下一颗是什么味道', author: '《阿甘正传》' },
+            { text: '不要问你的国家能为你做什么，而要问你能为你的国家做什么', author: '肯尼迪' },
+            { text: '成功不是终点，失败也不是终结，唯有勇气才是永恒', author: '丘吉尔' },
+            { text: '世界上只有一种真正的英雄主义，那就是认清生活的真相后依然热爱生活', author: '罗曼·罗兰' },
+        ];
+        const random = fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+        textEl.textContent = '💬 ' + random.text;
+        authorEl.textContent = '—— ' + random.author;
+        currentQuote = { text: random.text, author: random.author };
+    }
+}
+
+/**
+ * 复制当前名言到剪贴板
+ */
+function copyQuote() {
+    if (!currentQuote.text) {
+        alert('⚠️ 还没有名言可以复制，先点击“换一句”吧！');
+        return;
+    }
+
+    const copyText = `「${currentQuote.text}」—— ${currentQuote.author}`;
+
+    // 使用现代剪贴板 API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(copyText)
+            .then(() => {
+                alert('✅ 名言已复制到剪贴板！');
+            })
+            .catch(() => {
+                fallbackCopy(copyText);
+            });
+    } else {
+        fallbackCopy(copyText);
+    }
+}
+
+/**
+ * 传统复制方法（兼容旧浏览器）
+ */
+function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        document.execCommand('copy');
+        alert('✅ 名言已复制到剪贴板！');
+    } catch (err) {
+        alert('❌ 复制失败，请手动复制。');
+    }
+
+    document.body.removeChild(textarea);
+}
 }

@@ -141,10 +141,20 @@
     // ============================================
     // 第一部分：永久记忆功能（你之前写的，原封不动）
     // ============================================
-    window.onload = function() {
+       window.onload = function() {
+        // 1. 恢复用户名记忆
         let savedName = localStorage.getItem('userName');
         if (savedName) {
             document.getElementById('greeting').innerHTML = '你好，' + savedName + '！欢迎光临！';
+        }
+
+        // 2. 加载待办事项
+        loadTodos();
+
+        // 3. （可选）自动填入你的 GitHub 用户名，方便查询
+        const input = document.getElementById('github-username-input');
+        if (input) {
+            input.value = '123-0215'; // 改成你自己的用户名
         }
     }
 
@@ -405,6 +415,139 @@
         sorted.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
         renderRepos(sorted);
     }
+        // ============================================
+    // 第九部分：待办事项管理器（To-Do List）
+    // ============================================
+
+    // 1. 任务数据存储在哪里？—— 一个数组，每个任务是一个对象
+    //    { id: 唯一编号, text: '任务内容', completed: true/false }
+    let todos = [];
+
+    // 2. 页面一加载，就从 localStorage 里读取保存的任务
+    function loadTodos() {
+        const saved = localStorage.getItem('todos');
+        if (saved) {
+            try {
+                todos = JSON.parse(saved);
+            } catch (e) {
+                todos = [];
+            }
+        } else {
+            // 如果没有保存的任务，就放两个示例任务（让白板不空旷）
+            todos = [
+                { id: Date.now() + 1, text: '🌟 点击复选框标记完成', completed: false },
+                { id: Date.now() + 2, text: '🗑️ 点击删除按钮移除任务', completed: false },
+            ];
+        }
+        renderTodos();
+    }
+
+    // 3. 把任务列表“画”到网页上（类似之前的 renderRepos）
+    function renderTodos() {
+        const container = document.getElementById('todo-list');
+        const countSpan = document.getElementById('todo-count');
+
+        // 如果没有任务，显示占位提示
+        if (todos.length === 0) {
+            container.innerHTML = '<p style="color: #b2bec3; text-align: center; padding: 20px 0;">✨ 还没有任务，添加一条吧！</p>';
+            countSpan.textContent = '📋 0 个任务';
+            return;
+        }
+
+        // 生成任务列表的 HTML
+        let html = '';
+        todos.forEach(todo => {
+            // 如果任务已完成，文字加删除线，背景微灰
+            const completedClass = todo.completed ? 'style="text-decoration: line-through; color: #b2bec3;"' : '';
+            const bgStyle = todo.completed ? 'style="background: #f8f9fa;"' : '';
+
+            html += `
+                <div ${bgStyle} style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 8px; background: ${todo.completed ? '#f8f9fa' : '#ffffff'}; border-radius: 12px; border: 1px solid #dfe6e9; transition: 0.2s;">
+                    <input 
+                        type="checkbox" 
+                        ${todo.completed ? 'checked' : ''} 
+                        onchange="toggleTodo(${todo.id})"
+                        style="width: 20px; height: 20px; cursor: pointer; accent-color: #00b894;"
+                    >
+                    <span ${completedClass} style="flex: 1; font-size: 15px; color: ${todo.completed ? '#b2bec3' : '#2d3436'};">
+                        ${todo.text}
+                    </span>
+                    <a href="#" onclick="deleteTodo(${todo.id})" style="color: #e17055; text-decoration: none; font-size: 14px; font-weight: bold; padding: 4px 8px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='#ffeaa7'" onmouseout="this.style.background='transparent'">✕</a>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+
+        // 更新底部统计
+        const total = todos.length;
+        const completed = todos.filter(t => t.completed).length;
+        countSpan.textContent = `📋 ${total} 个任务 · ✅ ${completed} 已完成`;
+    }
+
+    // 4. 添加新任务
+    function addTodo() {
+        const input = document.getElementById('todo-input');
+        const text = input.value.trim();
+        
+        if (!text) {
+            alert('⚠️ 请输入任务内容！');
+            return;
+        }
+
+        // 创建新任务对象（id 用当前时间戳，保证唯一）
+        const newTodo = {
+            id: Date.now(),
+            text: text,
+            completed: false
+        };
+
+        todos.push(newTodo);
+        saveTodos();
+        renderTodos();
+        
+        // 清空输入框，并让它重新获得焦点（方便连续输入）
+        input.value = '';
+        input.focus();
+    }
+
+    // 5. 切换任务的完成状态（点击复选框时触发）
+    function toggleTodo(id) {
+        // 找到 id 匹配的任务，反转它的 completed 属性
+        const todo = todos.find(t => t.id === id);
+        if (todo) {
+            todo.completed = !todo.completed;
+            saveTodos();
+            renderTodos();
+        }
+    }
+
+    // 6. 删除单个任务（点击 ✕ 按钮时触发）
+    function deleteTodo(id) {
+        // 过滤掉 id 匹配的任务，剩下的保留
+        todos = todos.filter(t => t.id !== id);
+        saveTodos();
+        renderTodos();
+    }
+
+    // 7. 清空所有任务（点击“清空所有”时触发）
+    function clearTodos() {
+        if (todos.length === 0) return;
+        if (confirm('⚠️ 确定要删除所有任务吗？')) {
+            todos = [];
+            saveTodos();
+            renderTodos();
+        }
+    }
+
+    // 8. 保存到 localStorage（把数组转成 JSON 字符串存起来）
+    function saveTodos() {
+        localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    // 9. 在页面加载时，调用 loadTodos 来恢复数据
+    // 注意：需要在 window.onload 里添加这一行
+    // 我们把原有的 window.onload 稍微扩展一下
 </script>
 <body>
 <!-- 新玩具：GitHub 项目展示器 -->
@@ -446,6 +589,35 @@
     <a href="#" class="btn" style="background:#fd79a8; color:white; padding:8px 20px; font-size:14px;" onclick="sortByStars()">⭐ 按热度排序</a>
     <a href="#" class="btn" style="background:#00b894; color:white; padding:8px 20px; font-size:14px;" onclick="sortByName()">📛 按名称排序</a>
     <a href="#" class="btn" style="background:#fdcb6e; color:#2d3436; padding:8px 20px; font-size:14px;" onclick="sortByRecent()">🕒 按最近更新</a>
+</div>
+<!-- ========== 待办事项（To-Do List） ========== -->
+<hr style="margin: 30px 0; border: 1px solid #eee;">
+
+<h3 style="color:#2d3436;">✅ 我的待办清单</h3>
+
+<!-- 输入区域 -->
+<div style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <input 
+        type="text" 
+        id="todo-input" 
+        placeholder="输入新任务，按回车添加" 
+        style="flex: 1; padding: 12px 20px; border: 2px solid #dfe6e9; border-radius: 50px; font-size: 15px; outline: none; transition: 0.3s;"
+        onfocus="this.style.borderColor='#00b894'"
+        onblur="this.style.borderColor='#dfe6e9'"
+        onkeydown="if(event.key === 'Enter') addTodo()"
+    >
+    <a href="#" class="btn" style="background:#00b894; color:white; white-space:nowrap;" onclick="addTodo()">➕ 添加</a>
+</div>
+
+<!-- 任务列表容器 -->
+<div id="todo-list" style="text-align: left; margin-top: 10px;">
+    <!-- 这里会动态显示任务 -->
+</div>
+
+<!-- 底部统计 -->
+<div id="todo-stats" style="display: flex; justify-content: space-between; font-size: 14px; color: #b2bec3; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+    <span id="todo-count">📋 0 个任务</span>
+    <a href="#" style="color: #e17055; text-decoration: none; font-size: 13px;" onclick="clearTodos()">🧹 清空所有</a>
 </div>
     <!-- 主卡片 -->
     <div class="card">

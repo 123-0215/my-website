@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+<script type="module" crossorigin src="./assets/index-Dnqz-j8v.js"></script>
+<link rel="stylesheet" crossorigin href="./assets/index-CPwMn44B.css">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的程序员名片</title>
+    <!-- ====== 主卡片（所有内容都包在里面） ====== -->
+    <div class="card">
+
+        <!-- 智能灯光开关（暗黑/白天模式） -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+            <label onclick="toggleTheme()" style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-secondary); cursor: pointer; user-select: none;">
+                <span>🌞</span>
+                <div id="toggle-track" style="width: 50px; height: 26px; background: var(--border-color); border-radius: 13px; position: relative; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                    <div id="toggle-thumb" style="width: 22px; height: 22px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                </div>
+                <span>🌙</span>
+            </label>
+        </div>
+
+        <!-- 头像 -->
+        <div class="avatar"></div>
+
+        <!-- 标题（可被记忆和修改） -->
+        <h1 id="greeting">你好，我是 123-0215</h1>
+        <p class="title">🚀 前端开发练习生</p>
+
+        <!-- 简介 -->
+        <p class="bio">
+            我刚刚学会了 <strong>Git</strong> 和 <strong>GitHub Pages</strong>，<br>
+            这是我亲手搭建并上线的小名片。每天进步一点点！
+        </p>
+
+        <!-- 社交按钮 -->
+        <div class="links">
+            <a href="#" class="btn btn-github">🐙 GitHub</a>
+            <a href="#" class="btn btn-blog" onclick="document.getElementById('greeting').innerHTML = '你好，编程大牛！🚀'">📝 点我改名</a>
+            <a href="#" class="btn btn-email" onclick="alert('嘿嘿，你好呀！很高兴认识你！')">✉️ 联系我</a>
+            <a href="#" class="btn" style="background:#e17055; color:white;" onclick="forgetMe()">🧹 清除记忆</a>
+            <a href="#" class="btn" style="background:#00b894; color:white;" onclick="customGreeting()">✏️ 自定义称呼</a>
+        </div>
+
+        <hr style="margin: 30px 0; border: 1px solid var(--border-color);">
+
+        <!-- ====== GitHub 项目查询 ====== -->
+        <h3 style="color: var(--text-primary);">📦 GitHub 项目查询</h3>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 15px 0;">
+            <input 
+                type="text" 
+                id="github-username-input" 
+                placeholder="输入 GitHub 用户名（如：octocat）" 
+                style="flex: 1; min-width: 200px; padding: 12px 20px; border: 2px solid var(--border-color); border-radius: 50px; font-size: 15px; outline: none; transition: 0.3s; background: var(--input-bg); color: var(--text-primary);"
+                onfocus="this.style.borderColor='#6c5ce7'"
+                onblur="this.style.borderColor='var(--border-color)'"
+                onkeydown="if(event.key === 'Enter') queryUserRepos()"
+            >
+            <a href="#" class="btn" style="background:#6c5ce7; color:white; white-space:nowrap;" onclick="queryUserRepos()">🔍 查询</a>
+            <a href="#" class="btn" style="background:#00b894; color:white; white-space:nowrap;" onclick="fetchMyRepos()">🏠 我的项目</a>
+            <a href="#" class="btn" style="background:#e17055; color:white; white-space:nowrap;" onclick="clearAll()">🧹 清空</a>
+        </div>
+
+        <div id="query-status" style="font-size: 14px; color: var(--text-secondary); text-align: center; margin-bottom: 15px;">
+            💡 输入用户名，点击查询即可看到该用户的公开项目
+        </div>
+
+        <div id="repo-container">
+            <p style="color: var(--text-muted); text-align: center;">✨ 试试搜索一个 GitHub 用户名吧</p>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 15px;">
+            <a href="#" class="btn" style="background:#fd79a8; color:white; padding:8px 20px; font-size:14px;" onclick="sortByStars()">⭐ 按热度排序</a>
+            <a href="#" class="btn" style="background:#00b894; color:white; padding:8px 20px; font-size:14px;" onclick="sortByName()">📛 按名称排序</a>
+            <a href="#" class="btn" style="background:#fdcb6e; color:#2d3436; padding:8px 20px; font-size:14px;" onclick="sortByRecent()">🕒 按最近更新</a>
+        </div>
+
+        <hr style="margin: 30px 0; border: 1px solid var(--border-color);">
+
+        <!-- ====== 待办事项 ====== -->
+        <h3 style="color: var(--text-primary);">✅ 我的待办清单</h3>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <input 
+                type="text" 
+                id="todo-input" 
+                placeholder="输入新任务，按回车添加" 
+                style="flex: 1; padding: 12px 20px; border: 2px solid var(--border-color); border-radius: 50px; font-size: 15px; outline: none; transition: 0.3s; background: var(--input-bg); color: var(--text-primary);"
+                onfocus="this.style.borderColor='#00b894'"
+                onblur="this.style.borderColor='var(--border-color)'"
+                onkeydown="if(event.key === 'Enter') addTodo()"
+            >
+            <a href="#" class="btn" style="background:#00b894; color:white; white-space:nowrap;" onclick="addTodo()">➕ 添加</a>
+        </div>
+
+        <div id="todo-list" style="text-align: left; margin-top: 10px;"></div>
+
+        <div id="todo-stats" style="display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+            <span id="todo-count">📋 0 个任务</span>
+            <a href="#" style="color: #e17055; text-decoration: none; font-size: 13px;" onclick="clearTodos()">🧹 清空所有</a>
+        </div>
+<!-- ====== 天气预报 ====== -->
+<hr style="margin: 30px 0; border: 1px solid var(--border-color);">
+
+<h3 style="color: var(--text-primary);">🌤️ 天气预报</h3>
+
+<div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 15px 0;">
+    <input 
+        type="text" 
+        id="weather-input" 
+        placeholder="输入城市名（如：Beijing）" 
+        style="flex: 1; min-width: 180px; padding: 12px 20px; border: 2px solid var(--border-color); border-radius: 50px; font-size: 15px; outline: none; transition: 0.3s; background: var(--input-bg); color: var(--text-primary);"
+        onfocus="this.style.borderColor='#00b894'"
+        onblur="this.style.borderColor='var(--border-color)'"
+        onkeydown="if(event.key === 'Enter') fetchWeather()"
+    >
+    <a href="#" class="btn" style="background:#00b894; color:white; white-space:nowrap;" onclick="fetchWeather()">🔍 查询天气</a>
+</div>
+
+<!-- 天气展示容器 -->
+<div id="weather-container" style="text-align: center; min-height: 80px;">
+    <p style="color: var(--text-muted);">💡 输入城市名，点击查询即可查看天气</p>
+</div>
+<!-- ====== 每日金句 ====== -->
+<hr style="margin: 30px 0; border: 1px solid var(--border-color);">
+
+<h3 style="color: var(--text-primary);">💬 每日金句</h3>
+
+<!-- 金句展示区 -->
+<div id="quote-container" style="padding: 25px 20px; margin: 15px 0; background: var(--btn-ghost-bg); border-radius: 16px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <div id="quote-text" style="font-size: 18px; line-height: 1.8; color: var(--text-primary); font-style: italic; text-align: center;">
+        🌟 加载中...
+    </div>
+    <div id="quote-author" style="margin-top: 10px; font-size: 14px; color: var(--text-muted); text-align: center;">
+        ——
+    </div>
+</div>
+
+<!-- 按钮组 -->
+<div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+    <a href="#" class="btn" style="background:#6c5ce7; color:white;" onclick="fetchQuote()">🔄 换一句</a>
+    <a href="#" class="btn" style="background:#00b894; color:white;" onclick="copyQuote()">📋 复制</a>
+</div>
+</div>
+
+<!-- 按钮组 -->
+<div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+    <a href="#" class="btn" style="background:#6c5ce7; color:white;" onclick="fetchQuote()">🔄 换一句</a>
+    <a href="#" class="btn" style="background:#00b894; color:white;" onclick="copyQuote()">📋 复制</a>
+</div>
+    </div>
+    <!-- ====== 卡片结束 ====== -->
+
+    <div class="footer">
+        © 2026 我的第一个线上名片 · 自豪地运行在 GitHub Pages 上
+    </div>
+</body>
+</html>

@@ -10,6 +10,7 @@ window.onload = function() {
     }
     loadTodos();
     window.onload = function() {
+    // 1. 恢复用户名记忆
     let savedName = localStorage.getItem('userName');
     if (savedName) {
         document.getElementById('greeting').innerHTML = '你好，' + savedName + '！欢迎光临！';
@@ -17,6 +18,127 @@ window.onload = function() {
     loadTodos();
     loadTheme();
     loadLastWeather();  // 👈 新增这一行
+    window.onload = function() {
+    // 1. 恢复用户名记忆
+    let savedName = localStorage.getItem('userName');
+    if (savedName) {
+        document.getElementById('greeting').innerHTML = '你好，' + savedName + '！欢迎光临！';
+    }
+    loadTodos();
+    loadTheme();
+    loadLastWeather();
+    fetchQuote();  // 👈 新增这一行
+
+    const input = document.getElementById('github-username-input');
+    if (input) {
+        input.value = DEFAULT_USERNAME;
+    }
+}
+    // ============================================
+// 7. 每日金句功能
+// ============================================
+
+// 当前显示的名言（用于复制功能）
+let currentQuote = {
+    text: '',
+    author: ''
+};
+
+/**
+ * 从 API 获取一条随机名言
+ * 使用 quotable.io 免费 API，无需 API Key
+ */
+async function fetchQuote() {
+    const textEl = document.getElementById('quote-text');
+    const authorEl = document.getElementById('quote-author');
+
+    // 显示加载状态
+    textEl.textContent = '⏳ 加载中...';
+    authorEl.textContent = '——';
+
+    try {
+        // 调用 quotable.io 随机名言 API
+        const response = await fetch('https://api.quotable.io/random');
+
+        if (!response.ok) {
+            throw new Error(`请求失败 (状态码: ${response.status})`);
+        }
+
+        const data = await response.json();
+
+        // 提取数据
+        const content = data.content || '名言加载失败';
+        const author = data.author || '未知作者';
+
+        // 更新界面
+        textEl.textContent = '💬 ' + content;
+        authorEl.textContent = '—— ' + author;
+
+        // 保存当前名言（用于复制）
+        currentQuote = {
+            text: content,
+            author: author
+        };
+
+    } catch (error) {
+        console.error('获取名言失败:', error);
+        textEl.textContent = '😅 名言加载失败，请稍后再试';
+        authorEl.textContent = '——';
+    }
+}
+
+/**
+ * 复制当前名言到剪贴板
+ */
+function copyQuote() {
+    if (!currentQuote.text) {
+        alert('⚠️ 还没有名言可以复制，先点击“换一句”吧！');
+        return;
+    }
+
+    // 构造要复制的文本
+    const copyText = `「${currentQuote.text}」—— ${currentQuote.author}`;
+
+    // 使用现代剪贴板 API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(copyText)
+            .then(() => {
+                alert('✅ 名言已复制到剪贴板！');
+            })
+            .catch(() => {
+                // 如果剪贴板 API 失败，回退到传统方法
+                fallbackCopy(copyText);
+            });
+    } else {
+        // 浏览器不支持剪贴板 API，使用传统方法
+        fallbackCopy(copyText);
+    }
+}
+
+/**
+ * 传统复制方法（兼容旧浏览器）
+ */
+function fallbackCopy(text) {
+    // 创建一个临时 textarea 元素
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        document.execCommand('copy');
+        alert('✅ 名言已复制到剪贴板！');
+    } catch (err) {
+        alert('❌ 复制失败，请手动复制。');
+    }
+
+    document.body.removeChild(textarea);
+}
+
+// 页面加载时自动获取一条名言（可选）
+// 在 window.onload 里添加 fetchQuote();
 
     const input = document.getElementById('github-username-input');
     if (input) {

@@ -11,12 +11,41 @@
             padding: 0;
             box-sizing: border-box;
         }
+        /* ---------- 定义颜色变量（相当于灯的遥控器） ---------- */
+        :root {
+            --bg-gradient-start: #667eea;
+            --bg-gradient-end: #764ba2;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            --text-primary: #2d3436;
+            --text-secondary: #636e72;
+            --text-muted: #b2bec3;
+            --border-color: var(--border-color)
+            --input-bg: #ffffff;
+            --hover-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+            --btn-ghost-bg: #f1f2f6;
+            --todo-item-bg: #ffffff;
+        }
 
+        /* ---------- 暗黑模式的颜色（另一套遥控器按键） ---------- */
+        body.dark-mode {
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-end: #16213e;
+            --card-bg: rgba(30, 30, 46, 0.95);
+            --card-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            --text-primary: #f5f6fa;
+            --text-secondary: #dcdde1;
+            --text-muted: #718093;
+            --border-color: #2f3640;
+            --input-bg: #2f3640;
+            --hover-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
+            --btn-ghost-bg: #2f3640;
+            --todo-item-bg: #2f3640;
+        }
         body {
             font-family: 'Segoe UI', '微软雅黑', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%)
+            display：flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -26,41 +55,49 @@
         /* ---------- 白色主卡片（就像一张放在桌上的A4纸） ---------- */
         .card {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
+            backdrop-filter: var(--card-bg)
+            border-radius： 30px;
             padding: 40px 50px;
             max-width: 600px;
             width: 100%;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-            text-align: center;
+            box-shadow: var(--card-shadow)
+            text-align： center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         /* 鼠标悬停时卡片“浮起来”的特效 */
         .card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--hover-shadow)
         }
-
+    
+<!-- 智能灯光开关（暗黑/白天模式） -->
+<div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+    <label onclick="toggleTheme()" style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-secondary); cursor: pointer; user-select: none;">
+        <span>🌞</span>
+        <div style="width: 50px; height: 26px; background: var(--border-color); border-radius: 13px; position: relative; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+            <div id="toggle-thumb" style="width: 22px; height: 22px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+        </div>
+        <span>🌙</span>
+    </label>
+</div>
         /* ---------- 头像（圆形照片） ---------- */
         .avatar {
             width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: #ddd;
-            margin: 0 auto 20px;
-            /* 这里用了一个在线占位图服务，会自动生成一张随机的程序员头像 */
-            background-image: url('https://i.pravatar.cc/300?img=11');
-            background-size: cover;
-            background-position: center;
-            border: 5px solid #667eea;
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            height：150px；
+            border-radius：50%；
+            background：#ddd；
+            margin：0 auto 20px；
+            background-image：url（'https://i.pravatar.cc/300?img=11');
+            background-size：cover；
+            background-position：center；
+            border：5px solid #667eea；
+            box-shadow：0 10px 20px rgba（102, 126, 234, 0.3）；
         }
-
         /* ---------- 文字样式 ---------- */
         h1 {
             font-size: 32px;
-            color: #2d3436;
+            color: var(--text-primary);
             margin-bottom: 5px;
         }
 
@@ -73,8 +110,8 @@
         }
 
         .bio {
-            color: #636e72;
-            font-size: 16px;
+            color: var(--text-secondary)
+            font-size： 16px;
             line-height: 1.8;
             margin-bottom: 25px;
         }
@@ -91,8 +128,8 @@
             display: inline-block;
             padding: 12px 30px;
             border-radius: 50px;
-            background: #f1f2f6;
-            color: #2d3436;
+            background: var(--btn-ghost-bg);
+            color: var(--text-primary);
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -141,7 +178,7 @@
     // ============================================
     // 第一部分：永久记忆功能（你之前写的，原封不动）
     // ============================================
-       window.onload = function() {
+         window.onload = function() {
         // 1. 恢复用户名记忆
         let savedName = localStorage.getItem('userName');
         if (savedName) {
@@ -151,13 +188,64 @@
         // 2. 加载待办事项
         loadTodos();
 
-        // 3. （可选）自动填入你的 GitHub 用户名，方便查询
+        // 3. 加载暗黑模式主题
+        loadTheme();
+
+        // 4. （可选）自动填入 GitHub 用户名
         const input = document.getElementById('github-username-input');
         if (input) {
-            input.value = '123-0215'; // 改成你自己的用户名
+            input.value = '123-0215';
         }
     }
+    // ============================================
+    // 第十部分：暗黑/白天模式切换
+    // ============================================
 
+    function toggleTheme() {
+        const body = document.body;
+        const track = document.getElementById('toggle-track');
+        const thumb = document.getElementById('toggle-thumb');
+
+        // 切换 dark-mode 类
+        body.classList.toggle('dark-mode');
+
+        // 判断当前是否是暗黑模式
+        const isDark = body.classList.contains('dark-mode');
+
+        // 移动滑块位置
+        if (isDark) {
+            thumb.style.transform = 'translateX(24px)';
+            thumb.style.background = '#f1c40f'; // 月亮变黄色
+        } else {
+            thumb.style.transform = 'translateX(0)';
+            thumb.style.background = 'white';
+        }
+
+        // 把用户的选择存进 localStorage，下次自动恢复
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    // 页面加载时，恢复上次的主题设置
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const body = document.body;
+        const track = document.getElementById('toggle-track');
+        const thumb = document.getElementById('toggle-thumb');
+
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+            if (thumb) {
+                thumb.style.transform = 'translateX(24px)';
+                thumb.style.background = '#f1c40f';
+            }
+        } else {
+            body.classList.remove('dark-mode');
+            if (thumb) {
+                thumb.style.transform = 'translateX(0)';
+                thumb.style.background = 'white';
+            }
+        }
+    }
     function customGreeting() {
         let userName = prompt('请输入你的名字：');
         if (userName && userName.trim() !== '') {
@@ -462,7 +550,7 @@
             const bgStyle = todo.completed ? 'style="background: #f8f9fa;"' : '';
 
             html += `
-                <div ${bgStyle} style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 8px; background: ${todo.completed ? '#f8f9fa' : '#ffffff'}; border-radius: 12px; border: 1px solid #dfe6e9; transition: 0.2s;">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 8px; background: ${todo.completed ? 'var(--btn-ghost-bg)' : 'var(--todo-item-bg)'}; border-radius: 12px; border: 1px solid var(--border-color); transition: 0.2s;">
                     <input 
                         type="checkbox" 
                         ${todo.completed ? 'checked' : ''} 

@@ -1,0 +1,182 @@
+/* ---------- 全局重置 ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ---------- 颜色变量 ---------- */
+:root {
+    --bg-gradient-start: #667eea;
+    --bg-gradient-end: #764ba2;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --card-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    --text-primary: #2d3436;
+    --text-secondary: #636e72;
+    --text-muted: #b2bec3;
+    --border-color: #dfe6e9;
+    --input-bg: #ffffff;
+    --hover-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+    --btn-ghost-bg: #f1f2f6;
+    --todo-item-bg: #ffffff;
+}
+
+/* ---------- 暗黑模式 ---------- */
+body.dark-mode {
+    --bg-gradient-start: #1a1a2e;
+    --bg-gradient-end: #16213e;
+    --card-bg: rgba(30, 30, 46, 0.95);
+    --card-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+    --text-primary: #f5f6fa;
+    --text-secondary: #dcdde1;
+    --text-muted: #718093;
+    --border-color: #2f3640;
+    --input-bg: #2f3640;
+    --hover-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
+    --btn-ghost-bg: #2f3640;
+    --todo-item-bg: #2f3640;
+}
+
+body {
+    font-family: 'Segoe UI', '微软雅黑', sans-serif;
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    transition: background 0.3s ease;
+}
+
+/* ---------- 主卡片 ---------- */
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 40px 50px;
+    max-width: 700px;
+    width: 100%;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--hover-shadow);
+}
+
+/* ---------- 头像 ---------- */
+.avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #ddd;
+    margin: 0 auto 20px;
+    background-image: url('https://i.pravatar.cc/300?img=11');
+    background-size: cover;
+    background-position: center;
+    border: 5px solid #667eea;
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* ---------- 文字样式 ---------- */
+h1 {
+    font-size: 32px;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    transition: color 0.3s ease;
+}
+
+.title {
+    font-size: 18px;
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.bio {
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 25px;
+    transition: color 0.3s ease;
+}
+
+/* ---------- 按钮 ---------- */
+.links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 50px;
+    background: var(--btn-ghost-bg);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.btn-github {
+    background: #24292e;
+    color: white;
+}
+.btn-github:hover {
+    background: #000;
+    transform: scale(1.05);
+}
+
+.btn-blog {
+    background: #667eea;
+    color: white;
+}
+.btn-blog:hover {
+    background: #5a6fd6;
+    transform: scale(1.05);
+}
+
+.btn-email {
+    background: #fd79a8;
+    color: white;
+}
+.btn-email:hover {
+    background: #e8437a;
+    transform: scale(1.05);
+}
+
+/* ---------- 底部 ---------- */
+.footer {
+    margin-top: 30px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+/* ---------- 手机适配 ---------- */
+@media (max-width: 600px) {
+    .card {
+        padding: 25px 20px;
+        border-radius: 20px;
+    }
+    h1 {
+        font-size: 24px;
+    }
+    .avatar {
+        width: 100px;
+        height: 100px;
+    }
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    .links {
+        gap: 10px;
+    }
+}

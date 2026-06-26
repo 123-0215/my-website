@@ -99,7 +99,28 @@
             <span id="todo-count">📋 0 个任务</span>
             <a href="#" style="color: #e17055; text-decoration: none; font-size: 13px;" onclick="clearTodos()">🧹 清空所有</a>
         </div>
+<!-- ====== 天气预报 ====== -->
+<hr style="margin: 30px 0; border: 1px solid var(--border-color);">
 
+<h3 style="color: var(--text-primary);">🌤️ 天气预报</h3>
+
+<div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 15px 0;">
+    <input 
+        type="text" 
+        id="weather-input" 
+        placeholder="输入城市名（如：Beijing）" 
+        style="flex: 1; min-width: 180px; padding: 12px 20px; border: 2px solid var(--border-color); border-radius: 50px; font-size: 15px; outline: none; transition: 0.3s; background: var(--input-bg); color: var(--text-primary);"
+        onfocus="this.style.borderColor='#00b894'"
+        onblur="this.style.borderColor='var(--border-color)'"
+        onkeydown="if(event.key === 'Enter') fetchWeather()"
+    >
+    <a href="#" class="btn" style="background:#00b894; color:white; white-space:nowrap;" onclick="fetchWeather()">🔍 查询天气</a>
+</div>
+
+<!-- 天气展示容器 -->
+<div id="weather-container" style="text-align: center; min-height: 80px;">
+    <p style="color: var(--text-muted);">💡 输入城市名，点击查询即可查看天气</p>
+</div>
     </div>
     <!-- ====== 卡片结束 ====== -->
 

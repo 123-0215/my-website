@@ -237,7 +237,139 @@
             container.innerHTML = `<p style="color: #e17055; text-align: center;">❌ 哎呀，加载失败了: ${error.message}。请稍后再试！</p>`;
         }
     }
+    // ============================================
+    // 第六部分：万能导航员（查询任意用户）
+    // ============================================
+    
+    // 核心函数：根据用户名查询 GitHub 项目
+    async function queryUserRepos() {
+        // 1. 获取用户输入框的内容
+        const input = document.getElementById('github-username-input');
+        let username = input.value.trim(); // trim() 去掉首尾空格
+        
+        // 2. 检查用户名是否为空
+        if (!username) {
+            alert('⚠️ 请先输入一个 GitHub 用户名！');
+            return;
+        }
 
+        // 3. 显示状态：正在查询
+        const status = document.getElementById('query-status');
+        status.innerHTML = `⏳ 正在查询用户 <strong>${username}</strong> 的项目...`;
+        status.style.color = '#6c5ce7';
+
+        // 4. 清空之前的数据（避免新旧数据混合显示）
+        allRepos = [];
+        const container = document.getElementById('repo-container');
+        container.innerHTML = '<p style="color: #999; text-align: center;">⏳ 正在加载...</p>';
+
+        // 5. 构造 API 地址（这次把用户名动态拼进去）
+        const apiUrl = `https://api.github.com/users/${username}/repos?sort=updated&per_page=12`;
+
+        try {
+            const response = await fetch(apiUrl);
+
+            // 6. 处理 HTTP 错误（比如用户不存在）
+            if (response.status === 404) {
+                status.innerHTML = `❌ 找不到用户 <strong>${username}</strong>，请检查拼写！`;
+                status.style.color = '#e17055';
+                container.innerHTML = `<p style="color: #e17055; text-align: center;">😅 用户 "${username}" 不存在，请重新输入。</p>`;
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`GitHub 返回错误码: ${response.status}`);
+            }
+
+            const repos = await response.json();
+
+            // 7. 如果用户没有任何公开项目
+            if (repos.length === 0) {
+                status.innerHTML = `📭 用户 <strong>${username}</strong> 没有公开项目。`;
+                status.style.color = '#fdcb6e';
+                container.innerHTML = `<p style="color: #999; text-align: center;">😅 用户 "${username}" 还没有公开项目。</p>`;
+                return;
+            }
+
+            // 8. 成功获取数据！
+            allRepos = repos;
+            renderRepos(allRepos);
+
+            // 9. 更新状态提示
+            status.innerHTML = `✅ 成功加载 <strong>${username}</strong> 的 ${repos.length} 个项目`;
+            status.style.color = '#00b894';
+
+            // 10. 额外显示当前查询的用户名（在卡片上方）
+            const userInfo = document.createElement('div');
+            userInfo.id = 'current-user-display';
+            userInfo.style.cssText = `
+                text-align: center; 
+                font-size: 14px; 
+                color: #6c5ce7; 
+                background: #f0edff; 
+                padding: 8px 16px; 
+                border-radius: 20px; 
+                display: inline-block;
+                margin: 0 auto 15px;
+                width: auto;
+            `;
+            userInfo.innerHTML = `👤 当前查询：<strong>${username}</strong>`;
+            
+            // 把用户名标签插入到容器前面
+            const containerParent = container.parentNode;
+            const oldUserDisplay = document.getElementById('current-user-display');
+            if (oldUserDisplay) {
+                oldUserDisplay.remove();
+            }
+            containerParent.insertBefore(userInfo, container);
+
+        } catch (error) {
+            // 如果网络出错
+            console.error('查询失败:', error);
+            status.innerHTML = `❌ 查询失败: ${error.message}`;
+            status.style.color = '#e17055';
+            container.innerHTML = `<p style="color: #e17055; text-align: center;">❌ 网络错误，请稍后再试。</p>`;
+        }
+    }
+
+    // ============================================
+    // 第七部分：清空功能（一键还原）
+    // ============================================
+    function clearAll() {
+        // 1. 清空输入框
+        const input = document.getElementById('github-username-input');
+        input.value = '';
+        
+        // 2. 清空全局数据
+        allRepos = [];
+        
+        // 3. 清空展示区
+        const container = document.getElementById('repo-container');
+        container.innerHTML = '<p style="color: #999; text-align: center;">💡 输入用户名后点击查询，即可看到该用户的 GitHub 项目</p>';
+        
+        // 4. 移除当前用户名显示
+        const userDisplay = document.getElementById('current-user-display');
+        if (userDisplay) {
+            userDisplay.remove();
+        }
+        
+        // 5. 重置状态提示
+        const status = document.getElementById('query-status');
+        status.innerHTML = '💡 输入 GitHub 用户名，点击查询即可看到该用户的公开项目';
+        status.style.color = '#636e72';
+    }
+
+    // ============================================
+    // 第八部分：修改原有的 fetchMyRepos 函数
+    // （让它在点击“🚀 显示我的项目”时，也走新的查询逻辑）
+    // ============================================
+    // 把原来的 fetchMyRepos 改成这样：
+    async function fetchMyRepos() {
+        // 把输入框的内容设置为你的用户名，然后自动执行查询
+        const input = document.getElementById('github-username-input');
+        input.value = '123-0215'; // 改成你自己的用户名！
+        await queryUserRepos();
+    }
     // ============================================
     // 第五部分：排序功能（图书管理员的技能）
     // ============================================
@@ -284,7 +416,25 @@
 <div id="repo-container" style="text-align: left; margin-top: 15px;">
     <p style="color: #999; text-align: center;">点击下方按钮，加载我的项目</p>
 </div>
-
+<!-- 查询面板：输入任意 GitHub 用户名 -->
+<div style="background: #f1f2f6; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center;">
+        <input 
+            type="text" 
+            id="github-username-input" 
+            placeholder="输入 GitHub 用户名（如：octocat）" 
+            style="flex: 1; min-width: 200px; padding: 12px 20px; border: 2px solid #ddd; border-radius: 50px; font-size: 16px; outline: none; transition: border-color 0.3s;"
+            onfocus="this.style.borderColor='#6c5ce7'"
+            onblur="this.style.borderColor='#ddd'"
+            onkeydown="if(event.key === 'Enter') queryUserRepos()"
+        >
+        <a href="#" class="btn" style="background:#6c5ce7; color:white; white-space: nowrap;" onclick="queryUserRepos()">🔍 查询这位用户</a>
+        <a href="#" class="btn" style="background:#e17055; color:white; white-space: nowrap;" onclick="clearAll()">🧹 清空</a>
+    </div>
+    <div id="query-status" style="margin-top: 10px; font-size: 14px; color: #636e72; text-align: center;">
+        💡 输入 GitHub 用户名，点击查询即可看到该用户的公开项目
+    </div>
+</div>
 <!-- 触发“打电话”动作的按钮 -->
 <a href="#" class="btn" style="background:#6c5ce7; color:white; margin-top: 10px;" onclick="fetchMyRepos()">🚀 显示我的项目</a>
     <!-- 主卡片 -->
